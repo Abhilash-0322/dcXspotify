@@ -5,6 +5,7 @@
 1. **Hardcoded localhost URLs** - App was trying to connect to `http://localhost:5000` in production
 2. **Unsafe error handling** - `error.response.data.message` causing "Cannot read properties of undefined" errors
 3. **Missing environment variable configuration**
+4. **Chrome/Brave ad blocker issue** - `net::ERR_BLOCKED_BY_CLIENT` due to localhost in bundled code
 
 ## What Was Changed
 
@@ -93,24 +94,48 @@ FRONTEND_URL=https://your-frontend-site.onrender.com
 
 ## Testing
 
-1. **Test locally first**:
+1. **For LOCAL DEVELOPMENT - Use Dev Server** (Not production build):
    ```bash
    # Terminal 1 - Backend
    cd backend
    npm start
 
-   # Terminal 2 - Frontend
+   # Terminal 2 - Frontend (DEV MODE - This works with ad blockers)
    cd frontend
    npm run dev
    ```
+   Access at: `http://localhost:3000`
 
-2. **After deployment**:
+2. **Why Chrome/Brave Block Production Build Locally**:
+   - Ad blockers (uBlock Origin, Brave Shields, etc.) block requests to `localhost:5000`
+   - They see it as tracking/analytics endpoints
+   - Firefox may not have ad blockers enabled by default
+   - **Solution**: Use `npm run dev` instead of building for local testing
+
+3. **Testing Production Build Locally** (Optional):
+   ```bash
+   # Preview the production build
+   cd frontend
+   npm run build
+   npx vite preview --port 3000
+   ```
+   You may need to disable ad blockers for localhost testing.
+
+4. **After Render deployment**:
    - Open browser console (F12)
    - Check Network tab for API requests
    - Verify requests go to your Render backend URL (not localhost)
    - Check for CORS errors
 
 ## Common Issues
+
+### Issue: Chrome/Brave blocking requests with `net::ERR_BLOCKED_BY_CLIENT`
+**Solution**: 
+- **This only happens with production builds running locally**
+- Ad blockers (uBlock Origin, Brave Shields) block localhost API calls
+- Use `npm run dev` instead of `npm run build` for local development
+- In dev mode, Vite proxies requests and ad blockers don't block them
+- On Render, this won't be an issue since you'll use your real backend URL
 
 ### Issue: Still seeing localhost requests
 **Solution**: 
