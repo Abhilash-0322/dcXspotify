@@ -107,6 +107,8 @@ You'll also need accounts for:
    VITE_API_URL=http://localhost:5000/api
    VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    ```
+   
+   **Note**: Ensure the port in `VITE_API_URL` matches the `PORT` configured in your backend `.env` file.
 
 ## 🎬 Running the Application
 
