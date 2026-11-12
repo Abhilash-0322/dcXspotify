@@ -16,6 +16,8 @@ import authRoutes from "./routes/auth.route.js";
 import songRoutes from "./routes/song.route.js";
 import albumRoutes from "./routes/album.route.js";
 import statRoutes from "./routes/stats.route.js";
+import playlistRoutes from "./routes/playlist.route.js";
+import songCommentRoutes from "./routes/songComment.route.js";
 
 dotenv.config();
 
@@ -67,6 +69,8 @@ cron.schedule("0 * * * *", () => {
 // })
 
 app.use("/api/users", userRoutes);
+app.use("/api", songCommentRoutes);
+app.use("/api/playlists", playlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/songs", songRoutes);
@@ -82,7 +86,8 @@ if (process.env.NODE_ENV === "production") {
 
 // error handler
 app.use((err, req, res, next) => {
-	res.status(500).json({ message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message });
+	const status = Number(err.statusCode || err.status) || (err.name === "ValidationError" || err.name === "CastError" ? 400 : 500);
+	res.status(status).json({ message: process.env.NODE_ENV === "production" && status >= 500 ? "Internal server error" : err.message });
 });
 
 httpServer.listen(PORT, () => {

@@ -15,6 +15,13 @@ const userSchema = new mongoose.Schema(
 			required: true,
 			unique: true,
 		},
+		bio: { type:String, default:"" , maxlength:280 },
+		likedSongs: [{ type:mongoose.Schema.Types.ObjectId, ref:"Song" }],
+		following: [{ type:String }],
+		playHistory: [{
+			songId:{ type:mongoose.Schema.Types.ObjectId, ref:"Song", required:true },
+			playedAt:{ type:Date, default:Date.now },
+		}],
 	},
 	{ timestamps: true } //  createdAt, updatedAt
 );

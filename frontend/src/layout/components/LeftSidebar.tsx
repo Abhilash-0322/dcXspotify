@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { SignedIn } from "@clerk/clerk-react";
-import { Headphones, Heart, HomeIcon, Library, MessageCircle, Disc3 } from "lucide-react";
+import { Compass, Headphones, Heart, HomeIcon, Library, LibraryBig, MessageCircle, Disc3, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -32,6 +32,9 @@ const LeftSidebar = () => {
 						<HomeIcon className='mr-2 size-5' />
 						<span className='hidden md:inline'>Home</span>
 					</Link>
+					<Link to='/explore' className={linkClass(location.pathname === "/explore")}><Compass className='mr-2 size-5' /><span className='hidden md:inline'>Explore</span></Link>
+					<Link to='/library' className={linkClass(location.pathname === "/library")}><LibraryBig className='mr-2 size-5' /><span className='hidden md:inline'>Your library</span></Link>
+					<SignedIn><Link to='/community' className={linkClass(location.pathname === "/community")}><UsersRound className='mr-2 size-5' /><span className='hidden md:inline'>Community</span></Link></SignedIn>
 					<Link to='/liked' className={linkClass(location.pathname === "/liked")}><Heart className='mr-2 size-5' /><span className='hidden md:inline'>Liked songs</span></Link>
 
 					<SignedIn>
@@ -51,7 +54,7 @@ const LeftSidebar = () => {
 				<div className='flex items-center justify-between mb-4'>
 					<div className='flex items-center library-heading px-2'>
 						<Library className='size-5 mr-2' />
-						<span className='hidden md:inline'>Your library</span>
+						<span className='hidden md:inline'>Albums</span>
 					</div>
 				</div>
 

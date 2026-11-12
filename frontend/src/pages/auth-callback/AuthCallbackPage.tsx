@@ -4,6 +4,7 @@ import { useUser } from "@clerk/clerk-react";
 import { Loader } from "lucide-react"
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLibraryStore } from "@/stores/useLibraryStore";
 
 const AuthCallbackPage = () => {
   const {isLoaded,user}=useUser();
@@ -22,6 +23,7 @@ const AuthCallbackPage = () => {
           lastName:user.lastName,
           imageUrl:user.imageUrl
         })
+        await useLibraryStore.getState().loadPersonalData();
         syncAttempted.current=true;
       }catch(err){
         console.error("Error in auth callback",err);

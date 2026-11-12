@@ -2,6 +2,8 @@ import { axiosInstance } from "@/lib/axios";
 import { Album, Song, Stats, } from "@/types";
 import toast from "react-hot-toast";
 import { create } from "zustand";
+import { usePlayerStore } from "./usePlayerStore";
+import { useLibraryStore } from "./useLibraryStore";
 
 interface MusicStore {
 	songs: Song[];
@@ -48,7 +50,13 @@ export const useMusicStore = create<MusicStore>((set) => ({
 
 			set((state) => ({
 				songs: state.songs.filter((song) => song._id !== id),
+				featuredSongs:state.featuredSongs.filter((song)=>song._id!==id),
+				madeForYouSongs:state.madeForYouSongs.filter((song)=>song._id!==id),
+				trendingSongs:state.trendingSongs.filter((song)=>song._id!==id),
+				albums:state.albums.map((album)=>({...album,songs:album.songs.filter((song)=>song._id!==id)})),
 			}));
+			usePlayerStore.getState().removeSong(id);
+			useLibraryStore.getState().removeDeletedSong(id);
 			toast.success("Song deleted successfully");
 		} catch (error: any) {
 			console.log("Error in deleteSong", error);
@@ -64,9 +72,10 @@ export const useMusicStore = create<MusicStore>((set) => ({
 			await axiosInstance.delete(`/admin/albums/${id}`);
 			set((state) => ({
 				albums: state.albums.filter((album) => album._id !== id),
-				songs: state.songs.map((song) =>
-					song.albumId === state.albums.find((a) => a._id === id)?.title ? { ...song, album: null } : song
-				),
+				songs: state.songs.map((song) => song.albumId === id ? { ...song, albumId:null } : song),
+				featuredSongs:state.featuredSongs.map((song)=>song.albumId===id?{...song,albumId:null}:song),
+				madeForYouSongs:state.madeForYouSongs.map((song)=>song.albumId===id?{...song,albumId:null}:song),
+				trendingSongs:state.trendingSongs.map((song)=>song.albumId===id?{...song,albumId:null}:song),
 			}));
 			toast.success("Album deleted successfully");
 		} catch (error: any) {

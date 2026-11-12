@@ -15,7 +15,7 @@ interface ChatStore {
 	selectedUser: User | null;
 
 	fetchUsers: () => Promise<void>;
-	initSocket: (userId: string) => void;
+	initSocket: (token: string) => void;
 	disconnectSocket: () => void;
 	sendMessage: (receiverId: string, senderId: string, content: string) => void;
 	fetchMessages: (userId: string) => Promise<void>;
@@ -55,12 +55,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 		}
 	},
 
-	initSocket: (userId) => {
+	initSocket: (token) => {
 		if (!get().isConnected) {
-			socket.auth = { userId };
+			socket.removeAllListeners();
+			socket.auth = { token };
 			socket.connect();
-
-			socket.emit("user_connected", userId);
+			socket.on("connect", () => set({ isConnected:true }));
+			socket.on("disconnect", () => set({ isConnected:false }));
+			socket.on("connect_error", () => set({ isConnected:false }));
 
 			socket.on("users_online", (users: string[]) => {
 				set({ onlineUsers: new Set(users) });
@@ -109,10 +111,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 	},
 
 	disconnectSocket: () => {
-		if (get().isConnected) {
-			socket.disconnect();
-			set({ isConnected: false });
-		}
+		socket.disconnect();
+		socket.removeAllListeners();
+		set({ isConnected: false, onlineUsers:new Set(), userActivities:new Map() });
 	},
 
 	sendMessage: async (receiverId, senderId, content) => {

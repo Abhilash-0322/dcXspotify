@@ -8,6 +8,11 @@ export interface Song {
 	duration: number;
 	createdAt: string;
 	updatedAt: string;
+	genres?: string[];
+	mood?: string;
+	lyrics?: string;
+	plays?: number;
+	isExplicit?: boolean;
 }
 
 export interface Album {
@@ -17,6 +22,35 @@ export interface Album {
 	imageUrl: string;
 	releaseYear: number;
 	songs: Song[];
+}
+
+export interface Playlist {
+	_id: string;
+	title: string;
+	description: string;
+	ownerId: string;
+	ownerName: string;
+	ownerImageUrl?: string;
+	coverUrl?: string;
+	visibility: "public" | "unlisted" | "private";
+	songs: Song[];
+	likedBy?: string[];
+	updatedAt: string;
+}
+
+export interface SongComment {
+	_id: string;
+	songId: string;
+	userId: string;
+	userName: string;
+	userImageUrl?: string;
+	content: string;
+	createdAt: string;
+}
+
+export interface PlayHistoryEntry {
+	songId: Song;
+	playedAt: string;
 }
 
 export interface Stats {
@@ -40,4 +74,6 @@ export interface User {
 	clerkId: string;
 	fullName: string;
 	imageUrl: string;
+	bio?: string;
+	following?: string[];
 }

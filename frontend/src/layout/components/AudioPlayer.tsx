@@ -1,9 +1,11 @@
 import { usePlayerStore } from "@/stores/usePlayerStore";
+import { useLibraryStore } from "@/stores/useLibraryStore";
 import { useEffect, useRef } from "react";
 
 const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
+	const historySongRef = useRef<string | null>(null);
 
 	const { currentSong, isPlaying, playNext, repeat } = usePlayerStore();
 
@@ -46,6 +48,12 @@ const AudioPlayer = () => {
 
 			if (isPlaying) void audio.play().catch(() => undefined);
 		}
+	}, [currentSong, isPlaying]);
+
+	useEffect(() => {
+		if (!isPlaying || !currentSong || historySongRef.current === currentSong._id) return;
+		historySongRef.current = currentSong._id;
+		void useLibraryStore.getState().recordPlay(currentSong);
 	}, [currentSong, isPlaying]);
 
 	return <audio ref={audioRef} />;

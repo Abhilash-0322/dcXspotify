@@ -7,6 +7,8 @@ import SongsTabContent from "./components/SongsTabContent";
 import AlbumsTabContent from "./components/AlbumsTabContent";
 import { useEffect } from "react";
 import { useMusicStore } from "@/stores/useMusicStore";
+import { Link } from "react-router-dom";
+import { Loader } from "lucide-react";
 
 const AdminPage = () => {
 	const { isAdmin, isLoading } = useAuthStore();
@@ -14,12 +16,11 @@ const AdminPage = () => {
 	const { fetchAlbums, fetchSongs, fetchStats } = useMusicStore();
 
 	useEffect(() => {
-		fetchAlbums();
-		fetchSongs();
-		fetchStats();
-	}, [fetchAlbums, fetchSongs, fetchStats]);
+		if (isAdmin) { fetchAlbums(); fetchSongs(); fetchStats(); }
+	}, [fetchAlbums, fetchSongs, fetchStats, isAdmin]);
 
-	if (!isAdmin && isLoading) return <div>Unauthorized</div>;
+	if (isLoading) return <div className='min-h-screen bg-black text-white flex items-center justify-center'><Loader className='animate-spin' /></div>;
+	if (!isAdmin) return <div className='min-h-screen bg-black text-white flex flex-col items-center justify-center gap-3'><h1 className='text-2xl font-bold'>Studio access is restricted</h1><p className='text-zinc-400'>This account does not have administrator access.</p><Link className='text-emerald-400 underline' to='/'>Back to listening</Link></div>;
 
 	return (
 		<div

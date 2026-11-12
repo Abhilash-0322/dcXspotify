@@ -21,6 +21,9 @@ interface NewSong {
 	artist: string;
 	album: string;
 	duration: string;
+	genres: string;
+	mood: string;
+	lyrics: string;
 }
 
 const AddSongDialog = () => {
@@ -33,6 +36,9 @@ const AddSongDialog = () => {
 		artist: "",
 		album: "",
 		duration: "0",
+		genres: "",
+		mood: "",
+		lyrics: "",
 	});
 
 	const [files, setFiles] = useState<{ audio: File | null; image: File | null }>({
@@ -56,6 +62,9 @@ const AddSongDialog = () => {
 			formData.append("title", newSong.title);
 			formData.append("artist", newSong.artist);
 			formData.append("duration", newSong.duration);
+			formData.append("genres", newSong.genres);
+			formData.append("mood", newSong.mood);
+			formData.append("lyrics", newSong.lyrics);
 			if (newSong.album && newSong.album !== "none") {
 				formData.append("albumId", newSong.album);
 			}
@@ -74,6 +83,9 @@ const AddSongDialog = () => {
 				artist: "",
 				album: "",
 				duration: "0",
+				genres: "",
+				mood: "",
+				lyrics: "",
 			});
 
 			setFiles({
@@ -183,6 +195,19 @@ const AddSongDialog = () => {
 							onChange={(e) => setNewSong({ ...newSong, duration: e.target.value || "0" })}
 							className='bg-zinc-800 border-zinc-700'
 						/>
+					</div>
+
+					<div className='space-y-2'>
+						<label className='text-sm font-medium'>Genres</label>
+						<Input value={newSong.genres} onChange={(e) => setNewSong({ ...newSong, genres:e.target.value })} placeholder='Separate genres with commas' className='bg-zinc-800 border-zinc-700' />
+					</div>
+					<div className='space-y-2'>
+						<label className='text-sm font-medium'>Mood</label>
+						<Input value={newSong.mood} onChange={(e) => setNewSong({ ...newSong, mood:e.target.value })} placeholder='Focus, calm, energetic…' className='bg-zinc-800 border-zinc-700' />
+					</div>
+					<div className='space-y-2'>
+						<label className='text-sm font-medium'>Lyrics (optional)</label>
+						<textarea maxLength={12000} value={newSong.lyrics} onChange={(e) => setNewSong({ ...newSong, lyrics:e.target.value })} placeholder='Paste lyrics or liner notes' className='w-full min-h-24 rounded-md bg-zinc-800 border border-zinc-700 p-3 text-sm' />
 					</div>
 
 					<div className='space-y-2'>

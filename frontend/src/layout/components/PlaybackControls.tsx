@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
+import { useLibraryStore } from "@/stores/useLibraryStore";
 import { Heart, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,19 +12,21 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, shuffle, toggleShuffle, repeat, cycleRepeat, likedSongs, toggleLike } = usePlayerStore();
+	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, shuffle, toggleShuffle, repeat, cycleRepeat } = usePlayerStore();
+	const { favorites, toggleFavorite } = useLibraryStore();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const isLiked = !!currentSong && likedSongs.some((song) => song._id === currentSong._id);
+	const isLiked = !!currentSong && favorites.some((song) => song._id === currentSong._id);
 
 	useEffect(() => {
 		audioRef.current = document.querySelector("audio");
 
 		const audio = audioRef.current;
 		if (!audio) return;
+		audio.volume = volume / 100;
 
 		const updateTime = () => setCurrentTime(audio.currentTime);
 		const updateDuration = () => setDuration(audio.duration);
@@ -36,6 +39,10 @@ export const PlaybackControls = () => {
 			audio.removeEventListener("loadedmetadata", updateDuration);
 		};
 	}, [currentSong]);
+
+	useEffect(() => {
+		if (audioRef.current) audioRef.current.volume = volume / 100;
+	}, [volume]);
 
 	const handleSeek = (value: number[]) => {
 		if (audioRef.current) {
@@ -65,7 +72,7 @@ export const PlaybackControls = () => {
 							</div>
 						</>
 					)}
-					{currentSong && <button className={`player-like ${isLiked ? "is-liked" : ""}`} onClick={() => toggleLike(currentSong)} aria-label={isLiked ? "Remove from liked songs" : "Add to liked songs"}><Heart size={17} fill={isLiked ? "currentColor" : "none"} /></button>}
+					{currentSong && <button className={`player-like ${isLiked ? "is-liked" : ""}`} onClick={() => void toggleFavorite(currentSong)} aria-label={isLiked ? "Remove from liked songs" : "Add to liked songs"}><Heart size={17} fill={isLiked ? "currentColor" : "none"} /></button>}
 				</div>
 
 				{/* player controls*/}
@@ -87,6 +94,7 @@ export const PlaybackControls = () => {
 							className='hover:text-white text-zinc-400'
 							onClick={playPrevious}
 							disabled={!currentSong}
+							aria-label='Previous track'
 						>
 							<SkipBack className='h-4 w-4' />
 						</Button>
@@ -96,6 +104,7 @@ export const PlaybackControls = () => {
 							className='bg-white hover:bg-white/80 text-black rounded-full h-8 w-8'
 							onClick={togglePlay}
 							disabled={!currentSong}
+							aria-label={isPlaying ? "Pause" : "Play"}
 						>
 							{isPlaying ? <Pause className='h-5 w-5' /> : <Play className='h-5 w-5' />}
 						</Button>
@@ -105,6 +114,7 @@ export const PlaybackControls = () => {
 							className='hover:text-white text-zinc-400'
 							onClick={playNext}
 							disabled={!currentSong}
+							aria-label='Next track'
 						>
 							<SkipForward className='h-4 w-4' />
 						</Button>
@@ -126,6 +136,7 @@ export const PlaybackControls = () => {
 							max={duration || 100}
 							step={1}
 							className='w-full hover:cursor-grab active:cursor-grabbing'
+							aria-label='Track progress'
 							onValueChange={handleSeek}
 						/>
 						<div className='text-xs text-zinc-400'>{formatTime(duration)}</div>
@@ -143,6 +154,7 @@ export const PlaybackControls = () => {
 							max={100}
 							step={1}
 							className='w-24 hover:cursor-grab active:cursor-grabbing'
+							aria-label='Volume'
 							onValueChange={(value) => {
 								setVolume(value[0]);
 								if (audioRef.current) {

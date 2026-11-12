@@ -7,7 +7,6 @@ interface PlayerStore {
 	isPlaying: boolean;
 	queue: Song[];
 	currentIndex: number;
-	likedSongs: Song[];
 	shuffle: boolean;
 	repeat: "off" | "all" | "one";
 
@@ -17,18 +16,10 @@ interface PlayerStore {
 	togglePlay: () => void;
 	playNext: () => void;
 	playPrevious: () => void;
-	toggleLike: (song: Song) => void;
 	toggleShuffle: () => void;
 	cycleRepeat: () => void;
+	removeSong: (songId: string) => void;
 }
-
-const readLikedSongs = (): Song[] => {
-	try {
-		return JSON.parse(localStorage.getItem("music-chat-liked-songs") || "[]") as Song[];
-	} catch {
-		return [];
-	}
-};
 
 const updateActivity = (song: Song | null, playing: boolean) => {
 	const socket = useChatStore.getState().socket;
@@ -45,7 +36,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 	isPlaying: false,
 	queue: [],
 	currentIndex: -1,
-	likedSongs: readLikedSongs(),
 	shuffle: false,
 	repeat: "off",
 
@@ -158,13 +148,20 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 			updateActivity(null, false);
 		}
 	},
-	toggleLike: (song) => {
-		const likedSongs = get().likedSongs.some((liked) => liked._id === song._id)
-			? get().likedSongs.filter((liked) => liked._id !== song._id)
-			: [song, ...get().likedSongs];
-		try { localStorage.setItem("music-chat-liked-songs", JSON.stringify(likedSongs)); } catch { /* storage may be unavailable */ }
-		set({ likedSongs });
-	},
 	toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
 	cycleRepeat: () => set((state) => ({ repeat: state.repeat === "off" ? "all" : state.repeat === "all" ? "one" : "off" })),
+	removeSong: (songId) => {
+		const { queue, currentSong, currentIndex, isPlaying } = get();
+		const nextQueue = queue.filter((song) => song._id !== songId);
+		if (currentSong?._id !== songId) {
+			const removedBefore = queue.slice(0,currentIndex).filter((song) => song._id === songId).length;
+			set({ queue:nextQueue, currentIndex:Math.max(-1,currentIndex-removedBefore) });
+			return;
+		}
+		const nextIndex = Math.min(currentIndex,nextQueue.length-1);
+		const nextSong = nextQueue[nextIndex] || null;
+		if (nextSong && isPlaying) updateActivity(nextSong,true);
+		else updateActivity(null,false);
+		set({ queue:nextQueue, currentSong:nextSong, currentIndex:nextSong ? nextIndex : -1, isPlaying:!!nextSong && isPlaying });
+	},
 }));
