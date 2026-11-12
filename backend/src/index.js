@@ -17,11 +17,13 @@ import songRoutes from "./routes/song.route.js";
 import albumRoutes from "./routes/album.route.js";
 import statRoutes from "./routes/stats.route.js";
 
+import workspaceRoutes from "./routes/workspace.route.js";
+
 dotenv.config();
 
 const __dirname = path.resolve();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 const httpServer = createServer(app);
 initializeSocket(httpServer);
@@ -33,7 +35,7 @@ app.use(
 	})
 );
 
-app.use(express.json()); // to parse req.body
+app.use(express.json({ limit: "100kb" })); // to parse req.body
 app.use(clerkMiddleware()); // this will add auth to req obj => req.auth
 app.use(
 	fileUpload({
@@ -66,6 +68,7 @@ cron.schedule("0 * * * *", () => {
 // 	res.send({"Message":"Welcome To Spotify"})
 // })
 
+app.use("/api/workspace", workspaceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);

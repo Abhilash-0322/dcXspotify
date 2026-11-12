@@ -2,7 +2,8 @@ import { User } from "../models/user.model.js";
 
 export const authCallback = async (req, res, next) => {
 	try {
-		const { id, firstName, lastName, imageUrl } = req.body;
+		const { firstName, lastName, imageUrl } = req.body;
+        const id = (typeof req.auth === "function" ? req.auth() : req.auth).userId;
 
 		// check if user already exists
 		const user = await User.findOne({ clerkId: id });
@@ -11,7 +12,7 @@ export const authCallback = async (req, res, next) => {
 			// signup
 			await User.create({
 				clerkId: id,
-				fullName: `${firstName || ""} ${lastName || ""}`.trim(),
+				fullName: `${firstName || ""} ${lastName || ""}`.trim() || "Listener",
 				imageUrl,
 			});
 		}

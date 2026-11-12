@@ -19,7 +19,8 @@ const AdminPage = () => {
 		fetchStats();
 	}, [fetchAlbums, fetchSongs, fetchStats]);
 
-	if (!isAdmin && isLoading) return <div>Unauthorized</div>;
+	if (isLoading) return <div>Checking studio access…</div>;
+	if (!isAdmin) return <div className="p-8">Sign in with an administrator account to open the studio. <a href="/">Return to Amplify</a></div>;
 
 	return (
 		<div
