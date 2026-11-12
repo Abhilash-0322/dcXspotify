@@ -31,6 +31,9 @@ import {
   Menu,
   Settings,
   Clock3,
+  Orbit,
+  Sparkles,
+  Moon,
 } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import { useCatalog, useDeck } from "./store";
@@ -39,6 +42,9 @@ import { CreateList } from "./components";
 import { Screens } from "./screens";
 import { useAuthStore } from "@/stores/useAuthStore";
 import "./style.css";
+import "@/nocturne/dark.css";
+import { Appearance } from "@/nocturne/Experience";
+import { useNight } from "@/nocturne/state";
 const Admin = lazy(() => import("@/pages/admin/AdminPage"));
 function Queue({ close }: { close: () => void }) {
   const deck = useDeck();
@@ -105,6 +111,7 @@ function Queue({ close }: { close: () => void }) {
 }
 export default function Amplify() {
   const catalog = useCatalog();
+  const { motion, accent } = useNight();
   const { user } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
@@ -143,13 +150,15 @@ export default function Amplify() {
         <Route
           path="*"
           element={
-            <div className={`amp-app ${mobile ? "nav-open" : ""}`}>
+            <div
+              className={`amp-app night-app accent-${accent} ${!motion ? "motion-off" : ""} ${mobile ? "nav-open" : ""}`}
+            >
               <aside className="amp-sidebar">
                 <Link to="/" className="amp-logo">
                   <span>
                     <AudioLines size={25} />
                   </span>
-                  amplify<span className="amp-logo-dot">®</span>
+                  nocturne<span className="amp-logo-dot">®</span>
                 </Link>
                 <button
                   className="amp-mobile-close"
@@ -158,11 +167,14 @@ export default function Amplify() {
                 >
                   <PanelLeftClose />
                 </button>
-                <span className="amp-nav-label">YOUR DAILY SOUND</span>
+                <span className="amp-nav-label">YOUR UNIVERSE</span>
                 <nav>
                   {[
-                    [Home, "/", "Overview"],
+                    [Home, "/", "Your space"],
                     [Compass, "/discover", "Discover"],
+                    [Orbit, "/radar", "Radar"],
+                    [Sparkles, "/sessions", "Sessions"],
+                    [Moon, "/focus", "Focus room"],
                     [Library, "/library", "Your library"],
                     [Heart, "/favorites", "Liked songs"],
                     [Users, "/community", "Community"],
@@ -211,9 +223,9 @@ export default function Amplify() {
                 <div className="amp-sidebar-bottom">
                   <div className="amp-listening-note">
                     <span>
-                      GOOD MUSIC.
+                      AFTER DARK.
                       <br />
-                      BETTER TOGETHER.
+                      BEYOND ORDINARY.
                     </span>
                     <p>
                       Find your people.
@@ -259,7 +271,7 @@ export default function Amplify() {
                       <Menu />
                     </button>
                     <span className="amp-top-caption">
-                      A little discovery. A lot of feeling.
+                      THE WORLD OFF. YOUR SOUND ON.
                     </span>
                   </div>
                   <form
@@ -278,10 +290,11 @@ export default function Amplify() {
                     />
                     <kbd>↵</kbd>
                   </form>
+                  <Appearance />
                   <SignedOut>
                     <SignInButton mode="modal">
                       <button className="amp-signin">
-                        Join the good sound <ArrowUpRight size={15} />
+                        Enter your universe <ArrowUpRight size={15} />
                       </button>
                     </SignInButton>
                   </SignedOut>
@@ -310,9 +323,9 @@ export default function Amplify() {
                   )}
                   <div className="amp-page-footer">
                     <span>
-                      <AudioLines size={16} /> amplify
+                      <AudioLines size={16} /> nocturne
                     </span>
-                    <p>Life sounds better with a soundtrack.</p>
+                    <p>Made for the ones who feel everything.</p>
                     <span>TURN IT UP. FEEL SOMETHING.</span>
                   </div>
                 </main>

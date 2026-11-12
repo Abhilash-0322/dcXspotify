@@ -12,6 +12,7 @@ import {
   Volume2,
   VolumeX,
   Moon,
+  Maximize2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { duration, useCatalog, useDeck } from "./store";
@@ -216,6 +217,13 @@ export function Player({ onQueue }: { onQueue: () => void }) {
         </label>
       </div>
       <div className="amp-player-extras">
+        <Link
+          to="/focus"
+          aria-label="Open immersive focus room"
+          title="Focus room"
+        >
+          <Maximize2 size={17} />
+        </Link>
         <div className="amp-timer">
           <button
             aria-label="Sleep timer"

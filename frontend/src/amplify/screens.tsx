@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Link,
   Route,
@@ -8,12 +8,11 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import {
+  Headphones,
   ArrowRight,
   ArrowUpRight,
   Play,
   Plus,
-  Headphones,
-  Disc3,
   Heart,
   Music2,
   Users,
@@ -34,13 +33,13 @@ import {
   Empty,
   Modal,
   SectionTitle,
-  SongCards,
   TrackList,
 } from "./components";
 import type { Song } from "@/types";
 import { axiosInstance as api } from "@/lib/axios";
 import { useChatStore } from "@/stores/useChatStore";
 import toast from "react-hot-toast";
+import { NightHome, Sessions, Radar, Focus } from "@/nocturne/Experience";
 function Heading({
   eyebrow,
   title,
@@ -61,184 +60,6 @@ function Heading({
       </div>
       {children}
     </header>
-  );
-}
-function Home() {
-  const { songs, albums, profile } = useCatalog();
-  const play = useDeck((s) => s.play);
-  const { user } = useUser();
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const recommendations = useMemo(() => {
-    const artists = new Set([
-      ...profile.artists,
-      ...profile.likes.map((s) => s.artist),
-    ]);
-    const match = songs.filter(
-      (s) =>
-        artists.has(s.artist) && !profile.likes.some((l) => l._id === s._id),
-    );
-    return [...match, ...songs.filter((s) => !match.includes(s))].slice(0, 5);
-  }, [songs, profile]);
-  return (
-    <>
-      <Heading
-        eyebrow="YOUR WORLD, IN SOUND"
-        title={`${greeting}${user?.firstName ? `, ${user.firstName}` : ""}.`}
-        text="A fresh soundtrack for whatever today brings."
-      >
-        <span className="amp-date">
-          {new Date().toLocaleDateString("en", {
-            month: "short",
-            day: "numeric",
-            weekday: "short",
-          })}
-        </span>
-      </Heading>
-      <section className="amp-hero">
-        <div className="amp-hero-copy">
-          <span className="amp-pill">
-            <span /> THE DAILY DISCOVERY
-          </span>
-          <h2>
-            Less scrolling.
-            <br />
-            More <em>feeling.</em>
-          </h2>
-          <p>
-            Step outside your usual rotation.
-            <br />
-            Your next favorite is waiting to be found.
-          </p>
-          <button
-            disabled={!songs.length}
-            className="amp-button dark"
-            onClick={() => play(songs)}
-          >
-            <Play size={16} fill="currentColor" /> Find my frequency{" "}
-            <ArrowUpRight size={16} />
-          </button>
-          <div className="amp-hero-meta">
-            <span>
-              <Headphones size={15} /> Made for curious ears
-            </span>
-            <span>VOL. 01 — ON REPEAT</span>
-          </div>
-        </div>
-        <div className="amp-vinyl-scene" aria-hidden="true">
-          <div className="amp-orbit orbit-one" />
-          <div className="amp-orbit orbit-two" />
-          <div className="amp-record">
-            <div className="amp-record-label">
-              <AudioMark />
-              <span>
-                AMPLIFY
-                <br />
-                SIDE A
-              </span>
-              <i />
-            </div>
-          </div>
-          <div className="amp-vinyl-sticker">
-            FEEL
-            <br />
-            EVERY
-            <br />
-            <em>BEAT.</em>
-          </div>
-          <span className="amp-vinyl-caption">
-            33⅓ RPM / ENDLESS POSSIBILITIES
-          </span>
-        </div>
-      </section>
-      <div className="amp-quick-links">
-        <Link to="/favorites">
-          <span className="amp-quick-icon pink">
-            <Heart size={21} />
-          </span>
-          <div>
-            <strong>Your kind of love</strong>
-            <small>{profile.likes.length} liked tracks</small>
-          </div>
-          <ArrowUpRight size={19} />
-        </Link>
-        <Link to="/discover">
-          <span className="amp-quick-icon lime">
-            <Radio size={21} />
-          </span>
-          <div>
-            <strong>Out of your orbit</strong>
-            <small>Discover something new</small>
-          </div>
-          <ArrowUpRight size={19} />
-        </Link>
-        <Link to="/community">
-          <span className="amp-quick-icon lavender">
-            <Users size={21} />
-          </span>
-          <div>
-            <strong>Better together</strong>
-            <small>Playlists from the community</small>
-          </div>
-          <ArrowUpRight size={19} />
-        </Link>
-      </div>
-      <SectionTitle
-        eyebrow={
-          profile.likes.length || profile.artists.length
-            ? "INSPIRED BY YOUR LIBRARY"
-            : "A GOOD PLACE TO START"
-        }
-        title="Meet your next favorites"
-        to="/discover"
-      />
-      {recommendations.length ? (
-        <SongCards songs={recommendations} />
-      ) : (
-        <Empty title="The stage is ready">
-          Add your first tracks in the creator studio to bring Amplify to life.
-        </Empty>
-      )}
-      <div className="amp-home-bottom">
-        <section>
-          <SectionTitle
-            eyebrow="STRAIGHT FROM THE CATALOG"
-            title="Fresh in the rotation"
-            to="/discover?sort=newest"
-          />
-          <TrackList
-            songs={[...songs]
-              .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-              .slice(0, 4)}
-          />
-        </section>
-        <Link to="/albums" className="amp-album-promo">
-          <Disc3 size={35} />
-          <span className="amp-eyebrow">FROM FIRST TRACK TO LAST</span>
-          <h2>
-            Some stories
-            <br />
-            deserve a<br />
-            <em>full listen.</em>
-          </h2>
-          <span>
-            {albums.length} albums. Find your moment. <ArrowUpRight size={18} />
-          </span>
-        </Link>
-      </div>
-    </>
-  );
-}
-function AudioMark() {
-  return (
-    <div className="amp-audio-mark">
-      <i />
-      <i />
-      <i />
-      <i />
-      <i />
-    </div>
   );
 }
 function Discover() {
@@ -1129,7 +950,10 @@ function Chat() {
 export function Screens({ create }: { create: () => void }) {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/sessions" element={<Sessions />} />
+      <Route path="/radar" element={<Radar />} />
+      <Route path="/focus" element={<Focus />} />
+      <Route path="/" element={<NightHome />} />
       <Route path="/discover" element={<Discover />} />
       <Route path="/library" element={<Library create={create} />} />
       <Route path="/favorites" element={<Favorites />} />
@@ -1141,7 +965,7 @@ export function Screens({ create }: { create: () => void }) {
       <Route path="/community" element={<Community />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/chat" element={<Chat />} />
-      <Route path="/auth-callback" element={<Home />} />
+      <Route path="/auth-callback" element={<NightHome />} />
       <Route
         path="*"
         element={<Empty title="This frequency doesn’t exist" />}
