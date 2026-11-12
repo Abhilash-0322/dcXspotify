@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { Heart, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const formatTime = (seconds: number) => {
@@ -11,12 +11,13 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-	const { currentSong, isPlaying, togglePlay, playNext, playPrevious } = usePlayerStore();
+	const { currentSong, isPlaying, togglePlay, playNext, playPrevious, shuffle, toggleShuffle, repeat, cycleRepeat, likedSongs, toggleLike } = usePlayerStore();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const isLiked = !!currentSong && likedSongs.some((song) => song._id === currentSong._id);
 
 	useEffect(() => {
 		audioRef.current = document.querySelector("audio");
@@ -30,16 +31,9 @@ export const PlaybackControls = () => {
 		audio.addEventListener("timeupdate", updateTime);
 		audio.addEventListener("loadedmetadata", updateDuration);
 
-		const handleEnded = () => {
-			usePlayerStore.setState({ isPlaying: false });
-		};
-
-		audio.addEventListener("ended", handleEnded);
-
 		return () => {
 			audio.removeEventListener("timeupdate", updateTime);
 			audio.removeEventListener("loadedmetadata", updateDuration);
-			audio.removeEventListener("ended", handleEnded);
 		};
 	}, [currentSong]);
 
@@ -50,7 +44,7 @@ export const PlaybackControls = () => {
 	};
 
 	return (
-		<footer className='h-20 sm:h-24 bg-zinc-900 border-t border-zinc-800 px-4'>
+		<footer className='player-bar px-4'>
 			<div className='flex justify-between items-center h-full max-w-[1800px] mx-auto'>
 				{/* currently playing song */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%]'>
@@ -59,18 +53,19 @@ export const PlaybackControls = () => {
 							<img
 								src={currentSong.imageUrl}
 								alt={currentSong.title}
-								className='w-14 h-14 object-cover rounded-md'
+							className='w-14 h-14 object-cover rounded-lg player-cover'
 							/>
 							<div className='flex-1 min-w-0'>
-								<div className='font-medium truncate hover:underline cursor-pointer'>
+							<div className='font-semibold truncate'>
 									{currentSong.title}
 								</div>
-								<div className='text-sm text-zinc-400 truncate hover:underline cursor-pointer'>
+							<div className='text-sm text-zinc-400 truncate'>
 									{currentSong.artist}
 								</div>
 							</div>
 						</>
 					)}
+					{currentSong && <button className={`player-like ${isLiked ? "is-liked" : ""}`} onClick={() => toggleLike(currentSong)} aria-label={isLiked ? "Remove from liked songs" : "Add to liked songs"}><Heart size={17} fill={isLiked ? "currentColor" : "none"} /></button>}
 				</div>
 
 				{/* player controls*/}
@@ -79,7 +74,9 @@ export const PlaybackControls = () => {
 						<Button
 							size='icon'
 							variant='ghost'
-							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+							className={`hidden sm:inline-flex ${shuffle ? "text-emerald-400" : "text-zinc-400"}`}
+							onClick={toggleShuffle}
+							aria-label={shuffle ? "Turn shuffle off" : "Turn shuffle on"}
 						>
 							<Shuffle className='h-4 w-4' />
 						</Button>
@@ -114,9 +111,11 @@ export const PlaybackControls = () => {
 						<Button
 							size='icon'
 							variant='ghost'
-							className='hidden sm:inline-flex hover:text-white text-zinc-400'
+							className={`hidden sm:inline-flex ${repeat !== "off" ? "text-emerald-400" : "text-zinc-400"}`}
+							onClick={cycleRepeat}
+							aria-label={`Repeat ${repeat}`}
 						>
-							<Repeat className='h-4 w-4' />
+							<span className='repeat-control'><Repeat className='h-4 w-4' />{repeat === "one" && <small>1</small>}</span>
 						</Button>
 					</div>
 
@@ -134,19 +133,9 @@ export const PlaybackControls = () => {
 				</div>
 				{/* volume controls */}
 				<div className='hidden sm:flex items-center gap-4 min-w-[180px] w-[30%] justify-end'>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
-						<Mic2 className='h-4 w-4' />
-					</Button>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
-						<ListMusic className='h-4 w-4' />
-					</Button>
-					<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
-						<Laptop2 className='h-4 w-4' />
-					</Button>
-
 					<div className='flex items-center gap-2'>
-						<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400'>
-							<Volume1 className='h-4 w-4' />
+								<Button size='icon' variant='ghost' className='hover:text-white text-zinc-400' onClick={() => { const next = volume === 0 ? 75 : 0; setVolume(next); if (audioRef.current) audioRef.current.volume = next / 100; }} aria-label={volume === 0 ? "Unmute" : "Mute"}>
+											{volume === 0 ? <VolumeX className='h-4 w-4' /> : <Volume1 className='h-4 w-4' />}
 						</Button>
 
 						<Slider

@@ -4,47 +4,40 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { SignedIn } from "@clerk/clerk-react";
-import { HomeIcon, Library, MessageCircle } from "lucide-react";
+import { Headphones, Heart, HomeIcon, Library, MessageCircle, Disc3 } from "lucide-react";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const LeftSidebar = () => {
 	const { albums, fetchAlbums, isLoading } = useMusicStore();
+	const location = useLocation();
 
 	useEffect(() => {
 		fetchAlbums();
 	}, [fetchAlbums]);
 
-	console.log({ albums });
+	const linkClass = (active: boolean) => cn(buttonVariants({ variant: "ghost", className: `sidebar-link w-full justify-start ${active ? "is-active" : ""}` }));
 
 	return (
-		<div className='h-full flex flex-col gap-2'>
+		<div className='sidebar-shell h-full flex flex-col gap-3'>
 			{/* Navigation menu */}
 
-			<div className='rounded-lg bg-zinc-900 p-4'>
-				<div className='space-y-2'>
+			<div className='sidebar-nav'>
+				<div className='sidebar-brand'><div className='brand-mark'><Headphones size={18} /></div><div><strong>sonora</strong><span>LISTEN TOGETHER</span></div></div>
+				<div className='space-y-1'>
 					<Link
 						to={"/"}
-						className={cn(
-							buttonVariants({
-								variant: "ghost",
-								className: "w-full justify-start text-white hover:bg-zinc-800",
-							})
-						)}
+						className={linkClass(location.pathname === "/")}
 					>
 						<HomeIcon className='mr-2 size-5' />
 						<span className='hidden md:inline'>Home</span>
 					</Link>
+					<Link to='/liked' className={linkClass(location.pathname === "/liked")}><Heart className='mr-2 size-5' /><span className='hidden md:inline'>Liked songs</span></Link>
 
 					<SignedIn>
 						<Link
 							to={"/chat"}
-							className={cn(
-								buttonVariants({
-									variant: "ghost",
-									className: "w-full justify-start text-white hover:bg-zinc-800",
-								})
-							)}
+							className={linkClass(location.pathname === "/chat")}
 						>
 							<MessageCircle className='mr-2 size-5' />
 							<span className='hidden md:inline'>Messages</span>
@@ -54,11 +47,11 @@ const LeftSidebar = () => {
 			</div>
 
 			{/* Library section */}
-			<div className='flex-1 rounded-lg bg-zinc-900 p-4'>
+			<div className='sidebar-library flex-1'>
 				<div className='flex items-center justify-between mb-4'>
-					<div className='flex items-center text-white px-2'>
+					<div className='flex items-center library-heading px-2'>
 						<Library className='size-5 mr-2' />
-						<span className='hidden md:inline'>Playlists</span>
+						<span className='hidden md:inline'>Your library</span>
 					</div>
 				</div>
 
@@ -71,17 +64,17 @@ const LeftSidebar = () => {
 								<Link
 									to={`/albums/${album._id}`}
 									key={album._id}
-									className='p-2 hover:bg-zinc-800 rounded-md flex items-center gap-3 group cursor-pointer'
+										className='library-item p-2 rounded-md flex items-center gap-3 group cursor-pointer'
 								>
 									<img
 										src={album.imageUrl}
-										alt='Playlist img'
+										alt={`${album.title} album cover`}
 										className='size-12 rounded-md flex-shrink-0 object-cover'
 									/>
 
 									<div className='flex-1 min-w-0 hidden md:block'>
 										<p className='font-medium truncate'>{album.title}</p>
-										<p className='text-sm text-zinc-400 truncate'>Album • {album.artist}</p>
+										<p className='text-sm text-zinc-400 truncate'><Disc3 size={12} className='inline mr-1' />{album.artist} · {album.releaseYear}</p>
 									</div>
 								</Link>
 							))
